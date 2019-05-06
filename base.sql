@@ -14,3 +14,16 @@ CREATE UNIQUE INDEX users_uid_uindex
 
 CREATE UNIQUE INDEX users_username_uindex
   ON "user" (username);
+
+CREATE TABLE IF NOT EXISTS upgrade
+(
+  uid SERIAL PRIMARY KEY NOT NULL,
+  name VARCHAR(128) NOT NULL,
+  cost INT NOT NULL,
+  type INT NOT NULL,
+  modificator INT NOT NULL,
+  image VARCHAR(128),
+  time INT
+);
+
+CREATE UNIQUE INDEX game_name_uindex ON public.game (name);

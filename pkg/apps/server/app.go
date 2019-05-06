@@ -1,11 +1,11 @@
 package server
 
 import (
+	"context"
+	"flag"
 	"mls_back/models"
 	"mls_back/session"
 	"mls_back/storage"
-	"context"
-	"flag"
 	"net/http"
 	"os"
 	"os/signal"
@@ -20,6 +20,7 @@ type Server struct {
 	httpSrv  *http.Server
 	sm       session.SessionManagerI
 	users    storage.UserStorageI
+	game     storage.GameStorageI
 	validate *validator.Validate
 	log      *log.Logger
 }
@@ -33,6 +34,7 @@ func newServer(logger *log.Logger) *Server {
 		},
 		sm:       session.NewSessionManager(),
 		users:    storage.GetUserStorage(),
+		game:     storage.GetGameStorage(),
 		validate: models.InitValidator(),
 		log:      logger,
 	}
@@ -68,6 +70,15 @@ func (srv *Server) createRoute() {
 	sessionRouter.HandleFunc("", srv.createSession).Methods(http.MethodPost)
 	sessionRouter.HandleFunc("", srv.getSession).Methods(http.MethodGet)
 	sessionRouter.HandleFunc("", srv.deleteSession).Methods(http.MethodDelete)
+
+	gameRouter := r.PathPrefix("/game").Subrouter()
+	// Handlers for work with game data
+	gameRouter.Use(srv.authRequierMiddleware)
+	gameRouter.HandleFunc("", srv.saveScore).Methods(http.MethodPost)
+	gameRouter.HandleFunc("/shop", srv.getShopPositions).Methods(http.MethodGet)
+	gameRouter.HandleFunc("/shop", srv.buyUpgrades).Methods(http.MethodPost)
+	gameRouter.HandleFunc("/achievement", srv.getAchievement).Methods(http.MethodGet)
+
 	srv.httpSrv.Handler = r
 }
 

@@ -7,6 +7,7 @@ type User struct {
 	Password string `db:"pass" json:"-"`
 	Avatar   string `db:"avatar" json:"avatar,omitempty" `
 	Score    int    `db:"score" json:"score"`
+	Level    int    `db:"level" json:"level"`
 }
 
 func NewUser(username string, email string, password string) User {

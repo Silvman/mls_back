@@ -1,8 +1,8 @@
 package server
 
 import (
-	"mls_back/session"
 	"context"
+	"mls_back/session"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -59,6 +59,18 @@ func (srv *Server) logginigMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			srv.log.Infoln(r.Method, r.URL.Path)
+			next.ServeHTTP(w, r)
+		})
+}
+
+func (srv *Server) authRequierMiddleware(next http.Handler) http.Handler {
+	srv.log.Println("auth requier miiddleware")
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			if !getIsAuth(r) {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 			next.ServeHTTP(w, r)
 		})
 }
